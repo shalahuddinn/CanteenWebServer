@@ -5,7 +5,7 @@ from . import models
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Order
-        fields = ('id', 'cardID')
+        fields = ('id', 'cardID', 'amount', 'time')
 
 
 class SellerSerializer(serializers.ModelSerializer):
@@ -21,9 +21,19 @@ class MenuSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
+    orderTime = serializers.DateTimeField(source='orderID.time', read_only=True)
+    menuName = serializers.CharField(source='menuID.name', read_only=True)
     class Meta:
         model = models.OrderDetail
-        fields = ('id', 'orderID', 'menuID', 'price', 'qty', 'tableNumber', 'done', 'orderTime', 'finishTime', 'sellerID')
+        fields = ('id', 'orderID', 'menuID', 'price', 'qty', 'tableNumber', 'done', 'orderTime', 'finishTime', 'sellerID', 'menuName')
+
+# class OrderedMenuSerializer(serializers.Serializer):
+    # menuName = serializers.SlugRelatedField(many=True, read_only=True, slug_field='menuName')
+    # class Meta:
+    #     model = models.OrderDetail
+    #     fields = ('id', 'orderID', 'menuID', 'price', 'qty', 'tableNumber', 'done', 'orderTime', 'finishTime', 'sellerID', 'menuName')
+    # menu = MenuSerializer(many=True)
+    # order = OrderDetailSerializer(many=True)
 
 # class QueueTransactionSerializer(serializers.ModelSerializer):
 #     class Meta:
