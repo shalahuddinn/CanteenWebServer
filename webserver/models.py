@@ -1,7 +1,19 @@
 from django.db import models
 from passlib.hash import pbkdf2_sha256
 import datetime
+import os
 
+
+# Source:
+# https://www.dangtrinh.com/2015/11/django-imagefield-rename-file-on-upload.html
+# Accessed on March 9 2019
+def path_and_rename(instance, filename):
+    upload_to = 'media'
+    ext = filename.split('.')[-1]
+    # get filename
+    filename = '{}.{}'.format(instance.name, ext)
+    # return the whole path to the file
+    return os.path.join(upload_to, filename)
 
 
 class Order(models.Model):
@@ -21,7 +33,7 @@ class Seller(models.Model):
 
 
 class Menu(models.Model):
-    image = models.ImageField()
+    image = models.ImageField(upload_to=path_and_rename)
     name = models.CharField(max_length=100)
     price = models.IntegerField()
     category = models.IntegerField()

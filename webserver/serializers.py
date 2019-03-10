@@ -23,6 +23,7 @@ class MenuSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     orderTime = serializers.DateTimeField(source='orderID.time', read_only=True)
     menuName = serializers.CharField(source='menuID.name', read_only=True)
+    # sellerID = serializers.CharField(source='menuID.sellerID.id', read_only=True)
     class Meta:
         model = models.OrderDetail
         fields = ('id', 'orderID', 'menuID', 'price', 'qty', 'tableNumber', 'done', 'orderTime', 'finishTime', 'sellerID', 'menuName')
