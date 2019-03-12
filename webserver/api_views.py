@@ -37,8 +37,11 @@ class OrderDetailViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = models.OrderDetail.objects.all()
         sellerID = self.request.query_params.get('sellerID', None)
+        done = self.request.query_params.get('done', None)
         if sellerID is not None:
             queryset = queryset.filter(sellerID=sellerID)
+            if done is not None:
+                queryset = queryset.filter(sellerID=sellerID, done=done)
         return queryset
 
     # Enable Post of List

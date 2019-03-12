@@ -23,10 +23,12 @@ class MenuSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     orderTime = serializers.DateTimeField(source='orderID.time', read_only=True)
     menuName = serializers.CharField(source='menuID.name', read_only=True)
+    image = serializers.ImageField(source='menuID.image', read_only=True)
     # sellerID = serializers.CharField(source='menuID.sellerID.id', read_only=True)
     class Meta:
         model = models.OrderDetail
-        fields = ('id', 'orderID', 'menuID', 'price', 'qty', 'tableNumber', 'done', 'orderTime', 'finishTime', 'sellerID', 'menuName')
+        fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
+                  'tableNumber', 'done', 'orderTime', 'finishTime')
 
 # class OrderedMenuSerializer(serializers.Serializer):
     # menuName = serializers.SlugRelatedField(many=True, read_only=True, slug_field='menuName')
