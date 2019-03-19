@@ -23,6 +23,13 @@ class MenuViewset(viewsets.ModelViewSet):
     queryset = models.Menu.objects.all()
     serializer_class = serializers.MenuSerializer
 
+    def get_queryset(self):
+        queryset = models.Menu.objects.all()
+        sellerID = self.request.query_params.get('sellerID', None)
+        if sellerID is not None:
+            queryset = queryset.filter(sellerID=sellerID)
+        return queryset
+
     # def create(self, request, *args, **kwargs):
     #     serializer = self.get_serializer(data=request.data)
     #     serializer.is_valid(raise_exception=True)
