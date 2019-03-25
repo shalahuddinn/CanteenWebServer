@@ -17,7 +17,7 @@ class SellerSerializer(serializers.ModelSerializer):
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Menu
-        fields = ('id', 'image', 'name', 'price', 'category', 'availability', 'sellerID')
+        fields = ('id', 'image', 'name', 'price', 'category', 'availability', 'sellerID', 'qty')
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):

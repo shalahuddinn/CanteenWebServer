@@ -1,4 +1,6 @@
 from django.db import models
+from django.http import JsonResponse
+from rest_framework import serializers
 from passlib.hash import pbkdf2_sha256
 import datetime
 import os
@@ -38,6 +40,7 @@ class Menu(models.Model):
     price = models.IntegerField()
     category = models.IntegerField()
     availability = models.BooleanField(default=False)
+    qty = models.IntegerField(default=100)
     # booked = models.IntegerField()
     sellerID = models.ForeignKey(Seller, on_delete=models.PROTECT)
 
@@ -57,9 +60,17 @@ class OrderDetail(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.done:
             self.finishTime = datetime.datetime.now()
+        else:
+            menuID = self.menuID.id
+            menuObject = Menu.objects.get(id=menuID)
+            tempQty = menuObject.qty - self.qty
+            if tempQty>=0:
+                menuObject.qty = tempQty
+                menuObject.save()
+            else:
+                # return serializers.ValidationError()
+                raise serializers.ValidationError(menuObject.name + ": STOCK IS NOT SUFFICIENT")
         super().save(force_insert, force_update, using, update_fields)
-
-
 
 # class QueueTransaction(models.Model):
 #     orderID = models.ForeignKey(Order, on_delete=models.PROTECT)
