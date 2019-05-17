@@ -64,12 +64,8 @@ class OrderDetail(models.Model):
             menuID = self.menuID.id
             menuObject = Menu.objects.get(id=menuID)
             tempQty = menuObject.qty - self.qty
-            if tempQty>=0:
-                menuObject.qty = tempQty
-                menuObject.save()
-            else:
-                # return serializers.ValidationError()
-                raise serializers.ValidationError(menuObject.name + ": STOCK IS NOT SUFFICIENT")
+            menuObject.qty = tempQty
+            menuObject.save()
         super().save(force_insert, force_update, using, update_fields)
 
 # class QueueTransaction(models.Model):

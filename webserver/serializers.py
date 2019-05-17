@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from webserver.models import Menu
 from . import models
 
 
@@ -29,6 +31,23 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = models.OrderDetail
         fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
                   'tableNumber', 'done', 'orderTime', 'finishTime')
+
+    def validate(self, data):
+        # print(self)
+        # print(data)
+        menuID = data['menuID'].id
+        print(type(data['qty']))
+        print("data['qty']: ".format(int(data['qty'])))
+        print("Menu ID: {}".format(menuID))
+        menuObject = Menu.objects.get(id=menuID)
+        print("menuObject.qty: {}".format(menuObject.qty))
+        tempQty = int(menuObject.qty) - (data['qty'])
+        print("tempQty= {}".format(tempQty))
+        if tempQty < 0:
+            raise serializers.ValidationError("{}".format(menuObject.name))
+        return data
+
+
 
 # class OrderedMenuSerializer(serializers.Serializer):
     # menuName = serializers.SlugRelatedField(many=True, read_only=True, slug_field='menuName')
