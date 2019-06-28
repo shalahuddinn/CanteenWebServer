@@ -4,9 +4,11 @@ from rest_framework.response import Response
 from . import models
 from . import serializers
 
+
 class OrderViewset(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
+
 
 class SellerViewset(viewsets.ModelViewSet):
     # queryset = models.Seller.objects.all()
@@ -18,6 +20,7 @@ class SellerViewset(viewsets.ModelViewSet):
         if username is not None:
             queryset = queryset.filter(username=username)
         return queryset
+
 
 class MenuViewset(viewsets.ModelViewSet):
     queryset = models.Menu.objects.all()
@@ -44,11 +47,11 @@ class OrderDetailViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = models.OrderDetail.objects.all()
         sellerID = self.request.query_params.get('sellerID', None)
-        done = self.request.query_params.get('done', None)
+        itemStatus = self.request.query_params.get('itemStatus', None)
         if sellerID is not None:
             queryset = queryset.filter(sellerID=sellerID)
-            if done is not None:
-                queryset = queryset.filter(sellerID=sellerID, done=done)
+            if itemStatus is not None:
+                queryset = queryset.filter(sellerID=sellerID, itemStatus=itemStatus)
         return queryset
 
     # Enable Post of List
@@ -67,6 +70,12 @@ class OrderDetailViewset(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class PaymentViewset(viewsets.ModelViewSet):
+    queryset = models.Payment.objects.all()
+    serializer_class = serializers.PaymentSerializer
+
 
 # class OrderedMenuViewSet(viewsets.ViewSet):
 #     serializer_class = serializers.OrderedMenuSerializer

@@ -7,7 +7,7 @@ from . import models
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Order
-        fields = ('id', 'cardID', 'amount', 'time')
+        fields = ('id', 'paymentID', 'amount', 'orderTime', 'modifiedTime', 'orderStatus')
 
 
 class SellerSerializer(serializers.ModelSerializer):
@@ -23,14 +23,17 @@ class MenuSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
-    orderTime = serializers.DateTimeField(source='orderID.time', read_only=True)
+    orderTime = serializers.DateTimeField(source='orderID.orderTime', read_only=True)
+    orderStatus = serializers.CharField(source='orderID.orderStatus', read_only=True)
     menuName = serializers.CharField(source='menuID.name', read_only=True)
     image = serializers.ImageField(source='menuID.image', read_only=True)
     # sellerID = serializers.CharField(source='menuID.sellerID.id', read_only=True)
     class Meta:
         model = models.OrderDetail
+        # fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
+        #           'tableNumber', 'done', 'orderTime', 'finishTime', 'orderStatus')
         fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
-                  'tableNumber', 'done', 'orderTime', 'finishTime')
+                  'tableNumber', 'orderTime', 'modifiedTime', 'orderStatus', 'itemStatus')
 
     def validate(self, data):
         # print(self)
@@ -46,6 +49,12 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         if tempQty < 0:
             raise serializers.ValidationError("{}".format(menuObject.name))
         return data
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Payment
+        fields = ('id', 'cardID', 'amount', 'time')
 
 
 
