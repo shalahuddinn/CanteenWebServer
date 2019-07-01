@@ -25,14 +25,14 @@ class Order(models.Model):
         ('placed', 'Placed'),
         ('paid', 'Paid'),
         ('expired', 'Expired'),
-        ('cancel', 'Cancel')
+        ('canceled', 'Canceled')
     )
     paymentID = models.IntegerField(default=0)
     amount = models.IntegerField()
     orderTime = models.DateTimeField(auto_now_add=True)
     # expiredTime = models.DateTimeField(default=(timezone.now() + timezone.timedelta(minutes=1)))
     modifiedTime = models.DateTimeField(auto_now=True)
-    orderStatus = models.CharField(default="placed", null=False, max_length=7, choices=ORDER_STATUS_CHOICES)
+    orderStatus = models.CharField(default="placed", null=False, max_length=8, choices=ORDER_STATUS_CHOICES)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.orderStatus == "expired" or self.orderStatus == "cancel":
@@ -40,15 +40,24 @@ class Order(models.Model):
 
             menuID = orderDetailObject.menuID.id
             menuObject = Menu.objects.get(id=menuID)
-            tempQty = menuObject.qty + orderDetailObject.qty
-            menuObject.qty = tempQty
+            # tempQty = menuObject.qtyAvailable + orderDetailObject.qty
+            # print("Before")
+            # print("menuObject.qtyAvailable: {}".format(menuObject.qtyAvailable))
+            # print("menuObject.qtyBooked: {}".format(menuObject.qtyOnBooked))
+            # print("orderDetailObject.qty: {}".format(orderDetailObject.qty))
+            menuObject.qtyAvailable += orderDetailObject.qty
+            menuObject.qtyOnBooked -= orderDetailObject.qty
+            # print("After")
+            # print("menuObject.qtyAvailable: {}".format(menuObject.qtyAvailable))
+            # print("menuObject.qtyBooked: {}".format(menuObject.qtyOnBooked))
             menuObject.save()
+        elif self.orderStatus == "paid":
+            orderDetailObject = OrderDetail.objects.get(orderID=self.id)
 
-            # tempQty = menuObject.qty - self.qty
-            # menuObject.qty = tempQty
-            # menuObject.save()
-
-
+            menuID = orderDetailObject.menuID.id
+            menuObject = Menu.objects.get(id=menuID)
+            menuObject.qtyOnBooked -= orderDetailObject.qty
+            menuObject.save()
         super().save(force_insert, force_update, using, update_fields)
 
 
@@ -72,18 +81,20 @@ class Menu(models.Model):
     price = models.IntegerField()
     category = models.CharField(max_length=5, choices=CATEGORY_CHOICES)
     availability = models.BooleanField(default=False)
-    qty = models.IntegerField(default=100)
-    # booked = models.IntegerField()
+    qtyAvailable = models.PositiveIntegerField(default=0)
+    qtyOnBooked = models.PositiveIntegerField(default=0)
     sellerID = models.ForeignKey(Seller, on_delete=models.PROTECT)
 
 
 class OrderDetail(models.Model):
     ITEM_STATUS_CHOICES = (
+        ('placed', 'Placed'),
         ('done', 'Done'),
-        ('reject', 'Reject'),
-        ('placed', 'Placed')
+        ('reject', 'Reject')
     )
     orderID = models.ForeignKey(Order, on_delete=models.PROTECT)
+    # orderStatus = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="order_status")
+    sellerID = models.ForeignKey(Seller, on_delete=models.PROTECT)
     menuID = models.ForeignKey(Menu, on_delete=models.PROTECT)
     price = models.IntegerField()
     qty = models.IntegerField()
@@ -91,17 +102,22 @@ class OrderDetail(models.Model):
     # done = models.BooleanField(default=False)
     # orderTime = models.DateTimeField(auto_now_add=True)
     # finishTime = models.DateTimeField(auto_now=True)
-    modifiedTime = models.DateTimeField(auto_now=True)
-    sellerID = models.ForeignKey(Seller, on_delete=models.PROTECT)
+    modifiedTime = models.DateTimeField(null=True)
     itemStatus = models.CharField(default="placed", null=False, max_length=6, choices=ITEM_STATUS_CHOICES)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.itemStatus == "placed":
             menuID = self.menuID.id
             menuObject = Menu.objects.get(id=menuID)
-            tempQty = menuObject.qty - self.qty
-            menuObject.qty = tempQty
+            # tempQty = menuObject.qtyAvailable - self.qty
+            menuObject.qtyAvailable -= self.qty
+            menuObject.qtyOnBooked += self.qty
+            if menuObject.qtyAvailable == 0:
+                menuObject.availability = False
             menuObject.save()
+        else:
+            self.modifiedTime = timezone.now()
+
 
         # if self.done:
             # self.finishTime = datetime.datetime.now()
@@ -115,7 +131,7 @@ class OrderDetail(models.Model):
 
 
 class Payment(models.Model):
-    cardID = models.IntegerField()
+    cardID = models.CharField(max_length=8)
     amount = models.IntegerField()
     time = models.DateTimeField(auto_now_add=True)
 

@@ -19,7 +19,7 @@ class SellerSerializer(serializers.ModelSerializer):
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Menu
-        fields = ('id', 'image', 'name', 'price', 'category', 'availability', 'sellerID', 'qty')
+        fields = ('id', 'image', 'name', 'price', 'category', 'availability', 'qtyAvailable', 'qtyOnBooked', 'sellerID')
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
@@ -28,6 +28,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     menuName = serializers.CharField(source='menuID.name', read_only=True)
     image = serializers.ImageField(source='menuID.image', read_only=True)
     # sellerID = serializers.CharField(source='menuID.sellerID.id', read_only=True)
+
     class Meta:
         model = models.OrderDetail
         # fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
@@ -39,15 +40,17 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         # print(self)
         # print(data)
         menuID = data['menuID'].id
-        print(type(data['qty']))
-        print("data['qty']: ".format(int(data['qty'])))
-        print("Menu ID: {}".format(menuID))
+        # print(type(data['qty']))
+        # print("data['qty']: ".format(int(data['qty'])))
+        # print("Menu ID: {}".format(menuID))
         menuObject = Menu.objects.get(id=menuID)
-        print("menuObject.qty: {}".format(menuObject.qty))
-        tempQty = int(menuObject.qty) - (data['qty'])
-        print("tempQty= {}".format(tempQty))
+        if not menuObject.availability:
+            raise serializers.ValidationError("Not Available: {}".format(menuObject.name))
+        # print("menuObject.qty: {}".format(menuObject.qty))
+        tempQty = int(menuObject.qtyAvailable) - (data['qty'])
+        # print("tempQty= {}".format(tempQty))
         if tempQty < 0:
-            raise serializers.ValidationError("{}".format(menuObject.name))
+            raise serializers.ValidationError("Out Of Stock: {}".format(menuObject.name))
         return data
 
 

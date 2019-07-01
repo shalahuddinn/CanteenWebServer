@@ -44,6 +44,7 @@ class MenuViewset(viewsets.ModelViewSet):
 
 class OrderDetailViewset(viewsets.ModelViewSet):
     serializer_class = serializers.OrderDetailSerializer
+    
     def get_queryset(self):
         queryset = models.OrderDetail.objects.all()
         sellerID = self.request.query_params.get('sellerID', None)
@@ -59,8 +60,8 @@ class OrderDetailViewset(viewsets.ModelViewSet):
     # Accessed on March 9, 2019
     def create(self, request, pk=None, company_pk=None, project_pk=None):
         is_many = True if isinstance(request.data, list) else False
-        print("Is_many:")
-        print(is_many)
+        # print("Is_many:")
+        # print(is_many)
 
         serializer = self.get_serializer(data=request.data, many=is_many)
         serializer.is_valid(raise_exception=True)
