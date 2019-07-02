@@ -35,7 +35,7 @@ class Order(models.Model):
     orderStatus = models.CharField(default="placed", null=False, max_length=8, choices=ORDER_STATUS_CHOICES)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.orderStatus == "expired" or self.orderStatus == "cancel":
+        if self.orderStatus == "expired" or self.orderStatus == "canceled":
             orderDetailObject = OrderDetail.objects.filter(orderID=self.id)
 
             for orderDetail in orderDetailObject:
