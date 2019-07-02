@@ -37,20 +37,22 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                   'tableNumber', 'orderTime', 'modifiedTime', 'orderStatus', 'itemStatus')
 
     def validate(self, data):
-        # print(self)
-        # print(data)
-        menuID = data['menuID'].id
-        # print(type(data['qty']))
-        # print("data['qty']: ".format(int(data['qty'])))
-        # print("Menu ID: {}".format(menuID))
-        menuObject = Menu.objects.get(id=menuID)
-        if not menuObject.availability:
-            raise serializers.ValidationError("Not Available: {}".format(menuObject.name))
-        # print("menuObject.qty: {}".format(menuObject.qty))
-        tempQty = int(menuObject.qtyAvailable) - (data['qty'])
-        # print("tempQty= {}".format(tempQty))
-        if tempQty < 0:
-            raise serializers.ValidationError("Out Of Stock: {}".format(menuObject.name))
+        if self.context.get("request").method == "POST":
+            # if self.data.req.method =="POST":
+            # print(self)
+            # print(data)
+            menuID = data['menuID'].id
+            # print(type(data['qty']))
+            # print("data['qty']: ".format(int(data['qty'])))
+            # print("Menu ID: {}".format(menuID))
+            menuObject = Menu.objects.get(id=menuID)
+            if not menuObject.availability:
+                raise serializers.ValidationError("Not Available: {}".format(menuObject.name))
+            # print("menuObject.qty: {}".format(menuObject.qty))
+            tempQty = int(menuObject.qtyAvailable) - (data['qty'])
+            # print("tempQty= {}".format(tempQty))
+            if tempQty < 0:
+                raise serializers.ValidationError("Out Of Stock: {}".format(menuObject.name))
         return data
 
 

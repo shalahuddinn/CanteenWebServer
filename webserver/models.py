@@ -36,28 +36,24 @@ class Order(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.orderStatus == "expired" or self.orderStatus == "cancel":
-            orderDetailObject = OrderDetail.objects.get(orderID=self.id)
+            orderDetailObject = OrderDetail.objects.filter(orderID=self.id)
 
-            menuID = orderDetailObject.menuID.id
-            menuObject = Menu.objects.get(id=menuID)
-            # tempQty = menuObject.qtyAvailable + orderDetailObject.qty
-            # print("Before")
-            # print("menuObject.qtyAvailable: {}".format(menuObject.qtyAvailable))
-            # print("menuObject.qtyBooked: {}".format(menuObject.qtyOnBooked))
-            # print("orderDetailObject.qty: {}".format(orderDetailObject.qty))
-            menuObject.qtyAvailable += orderDetailObject.qty
-            menuObject.qtyOnBooked -= orderDetailObject.qty
-            # print("After")
-            # print("menuObject.qtyAvailable: {}".format(menuObject.qtyAvailable))
-            # print("menuObject.qtyBooked: {}".format(menuObject.qtyOnBooked))
-            menuObject.save()
+            for orderDetail in orderDetailObject:
+                menuID = orderDetail.menuID.id
+                menuObject = Menu.objects.get(id=menuID)
+                menuObject.qtyAvailable += orderDetail.qty
+                menuObject.qtyOnBooked -= orderDetail.qty
+                menuObject.save()
+
         elif self.orderStatus == "paid":
-            orderDetailObject = OrderDetail.objects.get(orderID=self.id)
+            orderDetailObject = OrderDetail.objects.filter(orderID=self.id)
 
-            menuID = orderDetailObject.menuID.id
-            menuObject = Menu.objects.get(id=menuID)
-            menuObject.qtyOnBooked -= orderDetailObject.qty
-            menuObject.save()
+            for orderDetail in orderDetailObject:
+                menuID = orderDetail.menuID.id
+                menuObject = Menu.objects.get(id=menuID)
+                menuObject.qtyOnBooked -= orderDetail.qty
+                menuObject.save()
+                
         super().save(force_insert, force_update, using, update_fields)
 
 
