@@ -12,7 +12,7 @@ import os
 # https://www.dangtrinh.com/2015/11/django-imagefield-rename-file-on-upload.html
 # Accessed on March 9 2019
 def path_and_rename(instance, filename):
-    upload_to = 'media'
+    upload_to = 'menu'
     ext = filename.split('.')[-1]
     # Get filename
     filename = '{}.{}'.format(instance.name, ext)
@@ -38,21 +38,23 @@ class Order(models.Model):
         if self.orderStatus == "expired" or self.orderStatus == "canceled":
             orderDetailObject = OrderDetail.objects.filter(orderID=self.id)
 
-            for orderDetail in orderDetailObject:
-                menuID = orderDetail.menuID.id
-                menuObject = Menu.objects.get(id=menuID)
-                menuObject.qtyAvailable += orderDetail.qty
-                menuObject.qtyOnBooked -= orderDetail.qty
-                menuObject.save()
+            if orderDetailObject.exists():
+                for orderDetail in orderDetailObject:
+                    menuID = orderDetail.menuID.id
+                    menuObject = Menu.objects.get(id=menuID)
+                    menuObject.qtyAvailable += orderDetail.qty
+                    menuObject.qtyOnBooked -= orderDetail.qty
+                    menuObject.save()
 
         elif self.orderStatus == "paid":
             orderDetailObject = OrderDetail.objects.filter(orderID=self.id)
 
-            for orderDetail in orderDetailObject:
-                menuID = orderDetail.menuID.id
-                menuObject = Menu.objects.get(id=menuID)
-                menuObject.qtyOnBooked -= orderDetail.qty
-                menuObject.save()
+            if orderDetailObject.exists():
+                for orderDetail in orderDetailObject:
+                    menuID = orderDetail.menuID.id
+                    menuObject = Menu.objects.get(id=menuID)
+                    menuObject.qtyOnBooked -= orderDetail.qty
+                    menuObject.save()
                 
         super().save(force_insert, force_update, using, update_fields)
 
