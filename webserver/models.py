@@ -132,6 +132,15 @@ class Payment(models.Model):
     cardID = models.CharField(max_length=8)
     amount = models.IntegerField()
     time = models.DateTimeField(auto_now_add=True)
+    orderID = models.ForeignKey(Order, on_delete=models.PROTECT)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        id = self.id
+        orderObject = Order.objects.get(id=self.orderID.id)
+        orderObject.paymentID = id
+        orderObject.orderStatus = "paid"
+        orderObject.save()
 
 
 # class QueueTransaction(models.Model):

@@ -59,7 +59,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Payment
-        fields = ('id', 'cardID', 'amount', 'time')
+        fields = ('id', 'cardID', 'amount', 'time', 'orderID')
 
 
 
