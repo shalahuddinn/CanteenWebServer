@@ -47,12 +47,13 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             # print("Menu ID: {}".format(menuID))
             menuObject = Menu.objects.get(id=menuID)
             if not menuObject.availability:
-                raise serializers.ValidationError("Not Available: {}".format(menuObject.name))
+                tempQty = int(menuObject.qtyAvailable) - (data['qty'])
+                # print("tempQty= {}".format(tempQty))
+                if tempQty < 0:
+                    raise serializers.ValidationError("Stok Habis: {}".format(menuObject.name))
+                else:
+                    raise serializers.ValidationError("Tidak Tersedia: {}".format(menuObject.name))
             # print("menuObject.qty: {}".format(menuObject.qty))
-            tempQty = int(menuObject.qtyAvailable) - (data['qty'])
-            # print("tempQty= {}".format(tempQty))
-            if tempQty < 0:
-                raise serializers.ValidationError("Out Of Stock: {}".format(menuObject.name))
         return data
 
 

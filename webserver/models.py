@@ -83,6 +83,11 @@ class Menu(models.Model):
     qtyOnBooked = models.PositiveIntegerField(default=0)
     sellerID = models.ForeignKey(Seller, on_delete=models.PROTECT)
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.qtyAvailable == 0:
+            self.availability = False
+        super().save(force_insert, force_update, using, update_fields)
+
 
 class OrderDetail(models.Model):
     ITEM_STATUS_CHOICES = (
