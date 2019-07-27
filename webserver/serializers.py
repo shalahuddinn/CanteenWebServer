@@ -50,9 +50,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
                 tempQty = int(menuObject.qtyAvailable) - (data['qty'])
                 # print("tempQty= {}".format(tempQty))
                 if tempQty < 0:
-                    raise serializers.ValidationError("Stok Habis: {}".format(menuObject.name))
+                    raise serializers.ValidationError("{} : Stok Habis".format(menuObject.name))
                 else:
-                    raise serializers.ValidationError("Tidak Tersedia: {}".format(menuObject.name))
+                    raise serializers.ValidationError("{} : Tidak Tersedia".format(menuObject.name))
             # print("menuObject.qty: {}".format(menuObject.qty))
         return data
 
