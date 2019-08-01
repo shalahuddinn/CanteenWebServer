@@ -1,6 +1,4 @@
 from rest_framework import serializers
-
-from webserver.models import Menu
 from . import models
 
 
@@ -27,13 +25,23 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     orderStatus = serializers.CharField(source='orderID.orderStatus', read_only=True)
     menuName = serializers.CharField(source='menuID.name', read_only=True)
     image = serializers.ImageField(source='menuID.image', read_only=True)
-    # sellerID = serializers.CharField(source='menuID.sellerID.id', read_only=True)
+    cardID = serializers.SerializerMethodField('getCardID')
+
+    def getCardID(self, instance):
+        paymentID = instance.orderID.paymentID
+        if paymentID != 0:
+        # print("Payment ID:{}".format(paymentID))
+            paymentObject = models.Payment.objects.get(id=paymentID)
+            cardID = paymentObject.cardID
+        else:
+            cardID = "null"
+        return cardID
 
     class Meta:
         model = models.OrderDetail
         # fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
         #           'tableNumber', 'done', 'orderTime', 'finishTime', 'orderStatus')
-        fields = ('id', 'orderID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
+        fields = ('id', 'orderID', 'cardID', 'sellerID', 'menuID', 'menuName', 'image', 'price', 'qty',
                   'tableNumber', 'orderTime', 'modifiedTime', 'orderStatus', 'itemStatus')
 
     def validate(self, data):
@@ -45,7 +53,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             # print(type(data['qty']))
             # print("data['qty']: ".format(int(data['qty'])))
             # print("Menu ID: {}".format(menuID))
-            menuObject = Menu.objects.get(id=menuID)
+            menuObject = models.Menu.objects.get(id=menuID)
             if not menuObject.availability:
                 raise serializers.ValidationError("Tidak Tersedia: {}".format(menuObject.name))
                 # print("tempQty= {}".format(tempQty))
